@@ -9,6 +9,8 @@
 
 @interface GSDropboxActivity : UIActivity
 
+- (id) initWithDirectUploadFlag:(BOOL)uploadsDirectly;
+
 + (NSString*)activityTypeString;
 
 @end

@@ -14,9 +14,19 @@
 
 @property (nonatomic, copy) NSArray *activityItems;
 @property (nonatomic, retain) GSDropboxDestinationSelectionViewController *dropboxDestinationViewController;
+@property (nonatomic) BOOL uploadDirectly;
 @end
 
 @implementation GSDropboxActivity
+
+- (id) initWithDirectUploadFlag:(BOOL)uploadsDirectly;
+{
+    self = [super init];
+    if (self) {
+        self.uploadDirectly = uploadsDirectly;
+    }
+    return self;
+}
 
 + (NSString *)activityTypeString
 {
@@ -54,14 +64,31 @@
     self.activityItems = [NSArray arrayWithArray:urlItems];
 }
 
-- (UIViewController *)activityViewController {
-    GSDropboxDestinationSelectionViewController *vc = [[GSDropboxDestinationSelectionViewController alloc] initWithStyle:UITableViewStylePlain];
-    vc.delegate = self;
-
-    UINavigationController *nc = [[UINavigationController alloc] initWithRootViewController:vc];
-    nc.modalPresentationStyle = UIModalPresentationFormSheet;
+- (void)performActivity {
+    for (NSURL *fileURL in self.activityItems) {
+        [[GSDropboxUploader sharedUploader] uploadFileWithURL:fileURL toPath:@"/"];
+    }
     
-    return nc;
+    [self activityDidFinish:YES];
+}
+
+
+
+- (UIViewController *)activityViewController {
+    
+    if (self.uploadDirectly) {
+        return nil;
+
+    }
+    else {
+        GSDropboxDestinationSelectionViewController *vc = [[GSDropboxDestinationSelectionViewController alloc] initWithStyle:UITableViewStylePlain];
+        vc.delegate = self;
+
+        UINavigationController *nc = [[UINavigationController alloc] initWithRootViewController:vc];
+        nc.modalPresentationStyle = UIModalPresentationFormSheet;
+        return nc;
+    }
+
 }
 
 #pragma mark - GSDropboxDestinationSelectionViewController delegate methods
